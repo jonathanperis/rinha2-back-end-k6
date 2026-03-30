@@ -1,26 +1,64 @@
-# jonathanperis-rinha2-back-end-k6
+# rinha2-back-end-k6
 
-This repository contains Grafana K6 stress tests designed for the "Rinha de Backend Segunda Edição". It simulates various backend transactional scenarios including debits, credits, client validations, and error handling.
+Grafana **k6** stress tests for the **Rinha de Backend** challenge (2nd Edition, 2024/Q1) — Dockerized with InfluxDB metrics export.
 
-## Technical Overview
+---
 
-- **Stress Testing with k6**: Implements multiple test scenarios (debits, credits, validations, account statements) to assess the performance and consistency of backend operations.
-- **Dockerized Environment**: Includes a Dockerfile to build a custom Docker image integrating a k6 binary compiled with the InfluxDB output extension.
-- **CI/CD Integration**: Uses GitHub Actions to automate the build and release pipeline, pushing Docker images for production deployments.
-- **Usage Modes**: 
-  - **Dev Mode**: Exports test metrics to InfluxDB.
-  - **Prod Mode**: Runs tests quietly and generates an HTML report.
-- **Project Scope**: This solution is actively used in Jonathan Peris's projects for the Rinha de Backend, showcasing these tests across all his submitted images.
+## About
+
+Stress test suite used across all Rinha de Backend implementations. Simulates transactional scenarios (debits, credits, client validations, error handling, account statements) to benchmark backend performance under load.
+
+This test suite is used by:
+
+- [rinha2-back-end-dotnet](https://github.com/jonathanperis/rinha2-back-end-dotnet) — C# / .NET
+- [rinha2-back-end-go](https://github.com/jonathanperis/rinha2-back-end-go) — Go
+- [rinha2-back-end-rust](https://github.com/jonathanperis/rinha2-back-end-rust) — Rust
+- [rinha2-back-end-python](https://github.com/jonathanperis/rinha2-back-end-python) — Python
+
+## Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| k6 (Grafana) | Load/stress testing |
+| Go 1.23 | Builds custom k6 binary with xk6-output-influxdb |
+| Docker | Multi-stage build (Go builder + Alpine runner) |
+| InfluxDB | Metrics export (dev mode) |
+| GitHub Actions | CI/CD for Docker image builds |
+
+## Modes
+
+- **Dev mode** (`MODE=dev`) — Exports metrics to InfluxDB for real-time monitoring in Grafana
+- **Prod mode** (`MODE=prod`) — Runs quietly and produces an HTML report
 
 ## Getting Started
 
-1. Ensure Docker is installed.
-2. Build the Docker image:
-   ```
-   docker build -t jonathanperis/rinha2-back-end-k6 .
-   ```
-3. Run the container in the desired MODE (dev or prod).
+### Build
 
-## Contributors
+```bash
+docker build -t rinha-k6 .
+```
 
-- Jonathan Peris (https://github.com/jonathanperis)
+### Run
+
+```bash
+# Production mode (HTML report)
+docker run --rm rinha-k6
+
+# Dev mode (InfluxDB export)
+docker run --rm -e MODE=dev -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6
+```
+
+## Project Structure
+
+```
+rinha2-back-end-k6/
+├── Dockerfile                 # Multi-stage: Go builder + Alpine runner
+├── test/stress-test/
+│   ├── rinha-test.js          # k6 test scenarios
+│   └── run-test.sh            # Entrypoint (dev vs prod mode)
+└── .github/workflows/         # CI/CD pipeline
+```
+
+## License
+
+Licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
