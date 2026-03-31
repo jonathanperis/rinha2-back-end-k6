@@ -10,10 +10,10 @@ Stress test suite used across all Rinha de Backend implementations. Simulates tr
 
 This test suite is used by:
 
-- [rinha2-back-end-dotnet](https://github.com/jonathanperis/rinha2-back-end-dotnet) — C# / .NET
-- [rinha2-back-end-go](https://github.com/jonathanperis/rinha2-back-end-go) — Go
-- [rinha2-back-end-rust](https://github.com/jonathanperis/rinha2-back-end-rust) — Rust
-- [rinha2-back-end-python](https://github.com/jonathanperis/rinha2-back-end-python) — Python
+- [rinha2-back-end-dotnet](https://github.com/jonathanperis/rinha2-back-end-dotnet) — C# / .NET ![Perfect Score](https://img.shields.io/badge/⭐_Perfect_Score-gold?style=flat-square)
+- [rinha2-back-end-go](https://github.com/jonathanperis/rinha2-back-end-go) — Go ![Learning Purposes](https://img.shields.io/badge/📚_Learning_Purposes-blue?style=flat-square)
+- [rinha2-back-end-rust](https://github.com/jonathanperis/rinha2-back-end-rust) — Rust ![Learning Purposes](https://img.shields.io/badge/📚_Learning_Purposes-blue?style=flat-square)
+- [rinha2-back-end-python](https://github.com/jonathanperis/rinha2-back-end-python) — Python ![Learning Purposes](https://img.shields.io/badge/📚_Learning_Purposes-blue?style=flat-square)
 
 ## Tech Stack
 
