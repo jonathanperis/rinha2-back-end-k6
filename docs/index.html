@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>rinha2-back-end-k6 | Jonathan Peris</title>
+  <meta name="description" content="Grafana K6 stress test suite for Rinha de Backend implementations. Unofficial reimplementation of the original Gatling/Scala tests.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-inner">
+        <div class="header-brand">
+          <span class="header-logo"><span class="prompt">~</span> rinha2-back-end-k6</span>
+        </div>
+        <nav>
+          <ul class="header-nav">
+            <li><a href="#about">About</a></li>
+            <li><a href="#scenarios">Scenarios</a></li>
+            <li><a href="#stack">Stack</a></li>
+            <li><a href="#implementations">Tested By</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">Stress Test Suite &mdash; Grafana K6</div>
+      <h1>Rinha de Backend<br><span class="highlight">K6 Test Suite</span></h1>
+      <p class="hero-desc">
+        An unofficial reimplementation of the
+        <a href="https://github.com/zanfranceschi/rinha-de-backend-2024-q1" target="_blank" rel="noopener">Rinha de Backend</a>
+        competition stress tests. Originally written in Gatling/Scala, rewritten in Grafana K6 (JavaScript) for better CI/CD integration and learning purposes.
+      </p>
+      <div class="hero-links">
+        <a href="https://github.com/jonathanperis/rinha2-back-end-k6" target="_blank" rel="noopener" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          Source Code
+        </a>
+        <a href="https://github.com/zanfranceschi/rinha-de-backend-2024-q1" target="_blank" rel="noopener" class="btn">
+          Original Competition
+        </a>
+        <a href="https://hub.docker.com/r/jonathanperis/rinha2-back-end-k6" target="_blank" rel="noopener" class="btn">
+          Docker Hub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <p class="section-label">// about</p>
+      <h2 class="section-title">What This Does</h2>
+      <p class="section-text">
+        This project provides a comprehensive K6 stress test suite that validates and benchmarks any Rinha de Backend implementation.
+        It simulates real-world transactional load &mdash; credits, debits, balance queries &mdash; while enforcing the competition's
+        SLA requirements: 98% of responses under 250ms with zero balance inconsistencies.
+      </p>
+      <div class="origin-card">
+        <span class="origin-icon">&#128218;</span>
+        <div class="origin-text">
+          The original competition tests were written in <strong>Gatling/Scala</strong>. This is an unofficial reimplementation
+          in <strong>Grafana K6</strong> (JavaScript), built for learning purposes and to enable native CLI integration
+          with CI/CD pipelines. It currently serves all of Jonathan's Rinha de Backend implementations
+          (<a href="https://jonathanperis.github.io/rinha2-back-end-dotnet/" target="_blank" rel="noopener">.NET</a>,
+          <a href="https://jonathanperis.github.io/rinha2-back-end-rust/" target="_blank" rel="noopener">Rust</a>,
+          <a href="https://jonathanperis.github.io/rinha2-back-end-go/" target="_blank" rel="noopener">Go</a>,
+          <a href="https://jonathanperis.github.io/rinha2-back-end-python/" target="_blank" rel="noopener">Python</a>).
+        </div>
+      </div>
+
+      <div class="arch-block">
+        <span class="comment"># usage</span><br>
+        <span class="keyword">docker</span> build -t jonathanperis/rinha2-back-end-k6 <span class="string">.</span><br><br>
+        <span class="comment"># dev mode &rarr; exports to InfluxDB</span><br>
+        <span class="keyword">docker</span> run -e <span class="string">MODE=dev</span> jonathanperis/rinha2-back-end-k6<br><br>
+        <span class="comment"># prod mode &rarr; generates HTML report</span><br>
+        <span class="keyword">docker</span> run -e <span class="string">MODE=prod</span> jonathanperis/rinha2-back-end-k6
+      </div>
+    </div>
+  </section>
+
+  <section id="scenarios">
+    <div class="container">
+      <p class="section-label">// test scenarios</p>
+      <h2 class="section-title">5 Parallel Scenarios</h2>
+      <p class="section-text">
+        The test suite runs 5 scenarios concurrently, simulating realistic transactional load
+        with ramping virtual users, input validation, and balance consistency checks.
+      </p>
+      <div class="scenario-grid">
+        <div class="scenario-card">
+          <div class="scenario-name">validacoes</div>
+          <div class="scenario-desc">Input validation &mdash; tests invalid types, decimal values, description length limits, null fields. Expects 422/400 responses.</div>
+          <div class="scenario-meta">5 VUs &middot; 1 iteration each</div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-name">cliente_nao_encontrado</div>
+          <div class="scenario-desc">Tests requests to non-existent client ID 6. Expects 404 responses.</div>
+          <div class="scenario-meta">1 VU &middot; 1 iteration</div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-name">debitos</div>
+          <div class="scenario-desc">Debit transactions with ramping load. Validates balance never exceeds negative limit. Expects 200 or 422.</div>
+          <div class="scenario-meta">1 &rarr; 220 VUs &middot; 4 min ramp</div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-name">creditos</div>
+          <div class="scenario-desc">Credit transactions with ramping load. Credits should always succeed. Validates saldo/limite consistency.</div>
+          <div class="scenario-meta">1 &rarr; 110 VUs &middot; 4 min ramp</div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-name">extratos</div>
+          <div class="scenario-desc">Account statement retrieval. Validates JSON structure, balance totals, and last 10 transactions.</div>
+          <div class="scenario-meta">10 VUs &middot; 1 iteration each</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="container">
+      <p class="section-label">// tech stack</p>
+      <h2 class="section-title">Built With</h2>
+      <div class="stack-grid">
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #7D64FF"></span>
+          <div>
+            <div class="stack-name">Grafana K6</div>
+            <div class="stack-desc">Load testing framework</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #F7DF1E"></span>
+          <div>
+            <div class="stack-name">JavaScript (ES6+)</div>
+            <div class="stack-desc">Test script language</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #00ADD8"></span>
+          <div>
+            <div class="stack-name">xk6 + Go 1.23</div>
+            <div class="stack-desc">Custom K6 binary builder</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #020F59"></span>
+          <div>
+            <div class="stack-name">InfluxDB</div>
+            <div class="stack-desc">Time-series metrics (dev mode)</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #2496ED"></span>
+          <div>
+            <div class="stack-name">Docker</div>
+            <div class="stack-desc">Multi-arch (amd64 + arm64)</div>
+          </div>
+        </div>
+        <div class="stack-item">
+          <span class="stack-dot" style="background: #2088FF"></span>
+          <div>
+            <div class="stack-name">GitHub Actions</div>
+            <div class="stack-desc">CI/CD, image publishing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="implementations">
+    <div class="container">
+      <p class="section-label">// tested implementations</p>
+      <h2 class="section-title">Serves All Rinha Backends</h2>
+      <p class="section-text">
+        This K6 test suite is used by all of Jonathan's Rinha de Backend implementations via their CI/CD pipelines.
+        Each push to main triggers automated stress tests using this Docker image.
+      </p>
+      <div class="impl-grid">
+        <a href="https://jonathanperis.github.io/rinha2-back-end-dotnet/" target="_blank" rel="noopener" class="impl-card">
+          <span class="impl-dot" style="background: #512BD4"></span>
+          <span class="impl-name">.NET / C#</span>
+          <span class="impl-badge">Perfect Score</span>
+        </a>
+        <a href="https://jonathanperis.github.io/rinha2-back-end-rust/" target="_blank" rel="noopener" class="impl-card">
+          <span class="impl-dot" style="background: #DEA584"></span>
+          <span class="impl-name">Rust</span>
+        </a>
+        <a href="https://jonathanperis.github.io/rinha2-back-end-go/" target="_blank" rel="noopener" class="impl-card">
+          <span class="impl-dot" style="background: #00ADD8"></span>
+          <span class="impl-name">Go</span>
+        </a>
+        <a href="https://jonathanperis.github.io/rinha2-back-end-python/" target="_blank" rel="noopener" class="impl-card">
+          <span class="impl-dot" style="background: #3776AB"></span>
+          <span class="impl-name">Python</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-inner">
+        <span class="footer-text">Built by <a href="https://jonathanperis.github.io/" target="_blank" rel="noopener">Jonathan Peris</a></span>
+        <div class="footer-links">
+          <a href="https://github.com/jonathanperis" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://github.com/zanfranceschi/rinha-de-backend-2024-q1" target="_blank" rel="noopener">Competition</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
