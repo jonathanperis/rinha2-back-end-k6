@@ -2,6 +2,9 @@ FROM golang:1.25-alpine3.21 AS builder
 # Install required packages
 RUN apk --no-cache add git
 
+# Allow Go to auto-download a newer toolchain if required by dependencies.
+ENV GOTOOLCHAIN=auto
+
 WORKDIR /src
 # Copy the test directory (assuming your unified test script is in test/stress-test)
 COPY test/stress-test/ ./stress-test/
