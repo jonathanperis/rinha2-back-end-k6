@@ -97,6 +97,7 @@ rinha2-back-end-k6/
 ## Workflow & Conventions
 
 - **All changes** must go through a **branch + PR** strategy (never push directly to main)
+- **Always sync main** before creating a new branch (`git checkout main && git pull origin main`) and before opening a PR (`git fetch origin main`, rebase if needed)
 - **PRs are rebase only** — no merge commits, no squash merges
 - **Use `gh` CLI** for all GitHub operations (repos, PRs, checks, merges, releases)
 - **Repo-wide files** (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, FUNDING.yml, etc.) live in the org-level `.github` repo — do not create them in this repository
