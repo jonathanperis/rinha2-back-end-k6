@@ -2,7 +2,7 @@
 
 > Grafana k6 load test suite for the Rinha de Backend 2024/Q1 challenge with custom xk6-output-influxdb binary and dual-mode execution
 
-[![Main Build](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-build.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-build.yml) [![Main Release](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml) [![CodeQL](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/codeql.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/codeql.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Deploy](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/deploy.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/deploy.yml) [![Main Release](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml) [![CodeQL](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/codeql.yml/badge.svg)](https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/codeql.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[Live demo →](https://jonathanperis.github.io/rinha2-back-end-k6/)** | **[Documentation →](https://jonathanperis.github.io/rinha2-back-end-k6/docs/)**
 
@@ -57,19 +57,17 @@ rinha2-back-end-k6/
 │   └── run-test.sh             — Entrypoint (dev vs prod mode)
 ├── .github/workflows/
 │   ├── main-release.yml        — Docker build + push to GHCR
-│   ├── main-build.yml          — Deploy docs to GitHub Pages
-│   ├── deploy-docs.yml         — Wiki → HTML doc generation
+│   ├── deploy.yml              — Deploy docs to GitHub Pages
 │   └── codeql.yml              — Security scanning
 └── docs/                       — Generated documentation site
 ```
 
 ## CI/CD
 
-Four GitHub Actions workflows:
+Three GitHub Actions workflows:
 
 - **Main Release** — builds multi-platform Docker image (amd64/arm64) and pushes to `ghcr.io/jonathanperis/rinha2-back-end-k6:latest`
-- **Main Build** — deploys documentation site to GitHub Pages
-- **Deploy Docs** — converts wiki markdown to HTML documentation
+- **Deploy** — deploys documentation site to GitHub Pages
 - **CodeQL** — security and quality scanning for JavaScript
 
 ## License
