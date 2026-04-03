@@ -92,3 +92,12 @@ rinha2-back-end-k6/
 - **Main:** Multi-platform Docker build (amd64/arm64) → push to GHCR
 - **Image:** `ghcr.io/jonathanperis/rinha2-back-end-k6:latest`
 - **Docs:** Wiki auto-converted to HTML → GitHub Pages
+
+---
+
+## Workflow & Conventions
+
+- **All changes** must go through a **branch + PR** strategy (never push directly to main)
+- **PRs are rebase only** — no merge commits, no squash merges
+- **Use `gh` CLI** for all GitHub operations (repos, PRs, checks, merges, releases)
+- **Repo-wide files** (SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, FUNDING.yml, etc.) live in the org-level `.github` repo — do not create them in this repository
