@@ -69,7 +69,6 @@ rinha2-back-end-k6/
 ├── .github/workflows/
 │   ├── main-release.yml  # Docker build + push to GHCR
 │   ├── deploy.yml        # Deploy docs to GitHub Pages
-│   ├── deploy-docs.yml   # Wiki → HTML doc generation
 │   └── codeql.yml        # Security scanning
 ├── docs/                 # Generated documentation site
 └── wiki/                 # Source wiki pages
