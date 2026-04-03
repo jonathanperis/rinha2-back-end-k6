@@ -1,0 +1,1 @@
+- [Test Design](test_design.md) — 5 scenarios with staggered execution, custom metrics, validation rules, dual modes, SharedArray
