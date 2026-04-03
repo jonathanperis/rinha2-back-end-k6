@@ -68,7 +68,7 @@ rinha2-back-end-k6/
 ├── Dockerfile            # Multi-stage: Go 1.25 + xk6 → Alpine 3.23
 ├── .github/workflows/
 │   ├── main-release.yml  # Docker build + push to GHCR
-│   ├── main-build.yml    # Deploy docs to GitHub Pages
+│   ├── deploy-pages.yml  # Deploy docs to GitHub Pages
 │   ├── deploy-docs.yml   # Wiki → HTML doc generation
 │   └── codeql.yml        # Security scanning
 ├── docs/                 # Generated documentation site
