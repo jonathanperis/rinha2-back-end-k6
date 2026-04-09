@@ -1,0 +1,126 @@
+---
+---
+
+<section id="test-scenarios" class="doc-section">
+  <h1>Test Scenarios</h1>
+  <p>
+    The test suite defines <strong>5 scenarios</strong> that run sequentially and in parallel,
+    covering both correctness validation and high-throughput load generation.
+    All scenarios target the same <code>BASE_URL</code> (default: <code>http://localhost:9999</code>).
+  </p>
+
+  <h2>Scenario Overview</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>VUs</th>
+        <th>Iterations / Duration</th>
+        <th>Start Time</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>validacoes</strong></td>
+        <td>5</td>
+        <td>1 iter each</td>
+        <td>0s</td>
+        <td>Edge-case validation (invalid inputs, 404, 422)</td>
+      </tr>
+      <tr>
+        <td><strong>cliente_nao_encontrado</strong></td>
+        <td>1</td>
+        <td>1 iter</td>
+        <td>0s</td>
+        <td>Validates 404 for unknown client IDs</td>
+      </tr>
+      <tr>
+        <td><strong>debitos</strong></td>
+        <td>1 → 220</td>
+        <td>4 min ramp</td>
+        <td>10s</td>
+        <td>High-concurrency debit transactions</td>
+      </tr>
+      <tr>
+        <td><strong>creditos</strong></td>
+        <td>1 → 110</td>
+        <td>4 min ramp</td>
+        <td>10s</td>
+        <td>High-concurrency credit transactions</td>
+      </tr>
+      <tr>
+        <td><strong>extratos</strong></td>
+        <td>10</td>
+        <td>1 iter each</td>
+        <td>After load</td>
+        <td>Final balance/statement consistency check</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>validacoes</h2>
+  <p>
+    Runs 5 VUs concurrently, each executing 1 iteration of edge-case checks:
+  </p>
+  <ul>
+    <li>Debit exceeding client limit → expects <code>422</code></li>
+    <li>Invalid transaction type → expects <code>422</code></li>
+    <li>Missing description field → expects <code>422</code></li>
+    <li>Description too long (&gt;10 chars) → expects <code>422</code></li>
+    <li>Empty description → expects <code>422</code></li>
+  </ul>
+
+  <h2>cliente_nao_encontrado</h2>
+  <p>
+    Single VU, single iteration. Sends requests to client IDs <code>0</code>, <code>6</code>,
+    and <code>999</code> — all of which must return <code>404 Not Found</code>.
+  </p>
+
+  <h2>debitos</h2>
+  <p>
+    The primary load scenario. Ramps from <strong>1 to 220 VUs</strong> over 4 minutes,
+    continuously posting debit transactions to randomly selected clients (IDs 1–5).
+    After each debit, the response body is validated:
+  </p>
+  <pre><code>// Balance must never go below the negative of the limit
+check(res, &#123;
+  'debit balance valid': (r) =&gt; r.json().saldo &gt;= r.json().limite * -1,
+&#125;);</code></pre>
+
+  <h2>creditos</h2>
+  <p>
+    Parallel to debitos. Ramps from <strong>1 to 110 VUs</strong> over 4 minutes,
+    posting credit transactions to randomly selected clients. Credits cannot fail due to
+    insufficient funds, so this scenario validates basic HTTP correctness (<code>200</code>)
+    and response shape.
+  </p>
+
+  <h2>extratos</h2>
+  <p>
+    Final consistency check. After the load scenarios complete, 10 VUs each request the
+    account statement (<code>GET /clientes/&#123;id&#125;/extrato</code>) for one client.
+    Validates that:
+  </p>
+  <ul>
+    <li>Response is <code>200 OK</code></li>
+    <li><code>saldo.total</code> is a number</li>
+    <li><code>ultimas_transacoes</code> is an array</li>
+    <li>Balance is consistent with the limit (<code>saldo.total &gt;= saldo.limite * -1</code>)</li>
+  </ul>
+
+  <h2>Custom Trend Metrics</h2>
+  <p>
+    The test file defines <strong>5 custom Trend metrics</strong> to track p95/p99 latency
+    broken down by operation type:
+  </p>
+  <pre><code>const transacaoTrend    = new Trend('transacao_duration');
+const extratoTrend      = new Trend('extrato_duration');
+const validacaoTrend    = new Trend('validacao_duration');
+const notFoundTrend     = new Trend('not_found_duration');
+const consistencyTrend  = new Trend('consistency_duration');</code></pre>
+  <p>
+    These appear as separate metrics in Grafana and the HTML report, making it easy to
+    identify which operation type is the bottleneck.
+  </p>
+</section>

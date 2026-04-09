@@ -1,0 +1,95 @@
+---
+---
+
+<section id="configuration" class="doc-section">
+  <h1>Configuration</h1>
+  <p>
+    The test suite is configured entirely through <strong>environment variables</strong>,
+    making it easy to switch between local development and CI/CD production runs without
+    modifying any test code.
+  </p>
+
+  <h2>Environment Variables</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>Default</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>MODE</code></td>
+        <td><code>prod</code></td>
+        <td>Run mode: <code>prod</code> (HTML report) or <code>dev</code> (InfluxDB export)</td>
+      </tr>
+      <tr>
+        <td><code>BASE_URL</code></td>
+        <td><code>http://localhost:9999</code></td>
+        <td>Base URL of the API under test (NGINX load balancer endpoint)</td>
+      </tr>
+      <tr>
+        <td><code>K6_INFLUXDB_ADDR</code></td>
+        <td>—</td>
+        <td>InfluxDB address for dev mode (e.g. <code>http://influxdb:8086</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Passing Variables</h2>
+  <p>When running directly with k6:</p>
+  <pre><code>k6 run \
+  -e MODE=dev \
+  -e BASE_URL=http://localhost:9999 \
+  -e K6_INFLUXDB_ADDR=http://localhost:8086 \
+  test/stress-test/rinha-test.js</code></pre>
+
+  <p>When running via Docker Compose:</p>
+  <pre><code>docker compose up k6 --build --force-recreate</code></pre>
+  <p>
+    The <code>docker-compose.yml</code> passes environment variables to the k6 container automatically.
+    Override them with a <code>.env</code> file or inline exports.
+  </p>
+
+  <h2>SharedArray — Client Data</h2>
+  <p>
+    Client data (IDs 1–5, with their credit limits) is loaded once at startup using k6's
+    <code>SharedArray</code> to avoid redundant memory allocation across VUs:
+  </p>
+  <pre><code>import &#123; SharedArray &#125; from 'k6/data';
+
+const clients = new SharedArray('clients', function () &#123;
+  return [
+    &#123; id: 1, limite: 100000 &#125;,
+    &#123; id: 2, limite: 80000  &#125;,
+    &#123; id: 3, limite: 1000000 &#125;,
+    &#123; id: 4, limite: 10000000 &#125;,
+    &#123; id: 5, limite: 500000 &#125;,
+  ];
+&#125;);</code></pre>
+
+  <h2>Thresholds</h2>
+  <p>
+    The suite does not enforce hard thresholds by default — it is designed to measure and report,
+    not pass/fail CI. Each sibling implementation's own CI pipeline decides whether to treat
+    threshold violations as failures.
+  </p>
+  <p>
+    Custom thresholds can be added to the <code>options</code> export in <code>rinha-test.js</code>:
+  </p>
+  <pre><code>export const options = &#123;
+  scenarios: &#123; /* ... */ &#125;,
+  thresholds: &#123;
+    'transacao_duration': ['p(95)&lt;500'],
+    'extrato_duration':   ['p(95)&lt;200'],
+    http_req_failed:      ['rate&lt;0.01'],
+  &#125;,
+&#125;;</code></pre>
+
+  <h2>Resource Constraints</h2>
+  <p>
+    The k6 container itself is intentionally kept <strong>outside</strong> the 1.5 CPU / 550MB RAM budget.
+    Only the API services (2x webapi + NGINX + PostgreSQL) are constrained.
+  </p>
+</section>

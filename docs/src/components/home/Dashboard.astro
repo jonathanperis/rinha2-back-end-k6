@@ -1,0 +1,80 @@
+---
+interface Stat {
+  value: string;
+  label: string;
+}
+
+interface ArchCard {
+  title: string;
+  description: string;
+}
+
+const stats: Stat[] = [
+  { value: '5', label: 'Test Scenarios' },
+  { value: '330+', label: 'Peak VUs' },
+  { value: '47k+', label: 'Target Requests' }
+];
+
+const archCards: ArchCard[] = [
+  {
+    title: 'Test Runner',
+    description: 'xk6 custom build with InfluxDB output. Multi-stage Docker image (Go 1.25 + Alpine 3.23).'
+  },
+  {
+    title: 'The Challenge',
+    description: 'Shared k6 suite for all Rinha de Backend implementations. Validates correctness and measures throughput under extreme concurrency.'
+  }
+];
+
+const stressTestMetrics = [
+  { value: '47k+', label: 'Requests/Second' },
+  { value: '<50ms', label: 'P95 Latency' },
+  { value: '99.9%', label: 'Success Rate' }
+];
+---
+
+<section class="dashboard">
+  <div class="stats-grid">
+    {stats.map(stat => (
+      <div class="stat-item">
+        <h3>{stat.value}</h3>
+        <p>{stat.label}</p>
+      </div>
+    ))}
+  </div>
+
+  <div class="arch-info">
+    {archCards.map(card => (
+      <div class="arch-card">
+        <h4>{card.title}</h4>
+        <p>{card.description}</p>
+      </div>
+    ))}
+  </div>
+</section>
+
+<section class="stress-tests">
+  <h3>⚡ Stress Test Results</h3>
+  <p class="stress-intro">
+    Validated under extreme load conditions using k6 and xk6. The suite measures throughput, latency,
+    and correctness across all Rinha de Backend implementations.
+  </p>
+
+  <div class="stress-metrics">
+    {stressTestMetrics.map(metric => (
+      <div class="stress-metric">
+        <span class="metric-value">{metric.value}</span>
+        <span class="metric-label">{metric.label}</span>
+      </div>
+    ))}
+  </div>
+
+  <div class="stress-links">
+    <a href="https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml" class="stress-link" target="_blank" rel="noopener noreferrer">
+      <span>📊</span> View CI/CD Runs
+    </a>
+    <a href="./docs/" class="stress-link">
+      <span>📖</span> Documentation
+    </a>
+  </div>
+</section>
