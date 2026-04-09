@@ -2,22 +2,26 @@
 ---
 
 <section class="hero">
-  <h1>Stress Test<br>Your API.</h1>
-  <p class="tagline">
-    Grafana k6 stress test suite for the Rinha de Backend 2024/Q1 challenge.
-    5 scenarios, custom Trend metrics, and InfluxDB/Grafana observability — containerized with xk6 and Docker.
-  </p>
-
-  <div class="badges">
-    <span class="badge">k6 / xk6</span>
-    <span class="badge">JavaScript</span>
-    <span class="badge">Docker</span>
-    <span class="badge">InfluxDB</span>
-    <span class="badge">Grafana</span>
+  <div class="hero-content">
+    <h1>BREAK IT BEFORE THEY DO</h1>
+    <p class="tagline">
+      Performance testing harness for Rinha de Backend 2024/Q1. Simulate absolute chaos and stress test your fictional bank API implementations to the breaking point.
+    </p>
+    <div class="cta-group">
+      <a href="./docs/" class="btn-fire">INITIATE TEST SEQUENCE</a>
+      <a href="https://github.com/jonathanperis/rinha2-back-end-k6" class="btn-secondary">Source Code</a>
+    </div>
   </div>
 
-  <div class="ctas">
-    <a href="./docs/" class="btn btn-primary">View Documentation &rarr;</a>
-    <a href="https://github.com/jonathanperis/rinha2-back-end-k6" class="btn btn-outline">View on GitHub &rarr;</a>
+  <div class="terminal-panel">
+    <div class="terminal-content">
+      <div class="term-line">&gt; WARN: Starting load test sequence...</div>
+      <div class="term-line">&gt; Booting Virtual Users (VUs)...</div>
+      <div class="term-line">&gt; Setup: Ramp-up initialized (0 -&gt; 500 VUs)</div>
+      <div class="term-line">&gt; Executing scenario: default</div>
+      <div class="term-line">&gt; Metric: http_reqs measuring throughput...</div>
+      <div class="term-line">&gt; ERR: API latencies spiking above 250ms</div>
+      <div class="term-line">&gt; <span class="cursor"></span></div>
+    </div>
   </div>
 </section>
