@@ -1,55 +1,46 @@
 ---
-interface Stat {
-  value: string;
-  label: string;
-}
-
-interface ArchCard {
-  title: string;
-  description: string;
-}
-
-const stats: Stat[] = [
-  { value: '5', label: 'Test Scenarios' },
-  { value: '330+', label: 'Peak VUs' },
-  { value: '47k+', label: 'Target Requests' }
-];
-
-const archCards: ArchCard[] = [
-  {
-    title: 'Test Runner',
-    description: 'xk6 custom build with InfluxDB output. Multi-stage Docker image (Go 1.25 + Alpine 3.23).'
-  },
-  {
-    title: 'The Challenge',
-    description: 'Shared k6 suite for all Rinha de Backend implementations. Validates correctness and measures throughput under extreme concurrency.'
-  }
-];
-
-const stressTestMetrics = [
-  { value: '47k+', label: 'Requests/Second' },
-  { value: '<50ms', label: 'P95 Latency' },
-  { value: '99.9%', label: 'Success Rate' }
-];
 ---
 
-<section class="dashboard">
-  <div class="stats-grid">
-    {stats.map(stat => (
-      <div class="stat-item">
-        <h3>{stat.value}</h3>
-        <p>{stat.label}</p>
-      </div>
-    ))}
+<section class="stats-grid">
+  <div class="stat-box">
+    <div class="stat-label">Virtual Users</div>
+    <div class="stat-value">30,000</div>
+    <div class="stat-sub">Concurrent simulation</div>
   </div>
+  <div class="stat-box warning">
+    <div class="stat-label">Ramp-up</div>
+    <div class="stat-value">500</div>
+    <div class="stat-sub">VUs over 3 mins</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-label">Target</div>
+    <div class="stat-value">47k+</div>
+    <div class="stat-sub">Successful requests</div>
+  </div>
+  <div class="stat-box danger">
+    <div class="stat-label">Test Duration</div>
+    <div class="stat-value">~3m</div>
+    <div class="stat-sub">Sustained chaos</div>
+  </div>
+</section>
 
-  <div class="arch-info">
-    {archCards.map(card => (
-      <div class="arch-card">
-        <h4>{card.title}</h4>
-        <p>{card.description}</p>
-      </div>
-    ))}
+<h2 class="section-title">TEST SCENARIOS</h2>
+<section class="scenarios">
+  <div class="scenario-card">
+    <h3>Create Transaction</h3>
+    <div class="endpoint"><span class="method post">POST</span> /clientes/[id]/transacoes</div>
+    <p>Stress tests the transactional integrity of the banking system. Simulates massive concurrent deposits and withdrawals to trigger race conditions and test database locks.</p>
+    <div class="progress-container">
+      <div class="progress-label">System Load [||||||||||||||||||..] 90%</div>
+    </div>
+  </div>
+  <div class="scenario-card">
+    <h3>Get Balance</h3>
+    <div class="endpoint"><span class="method get">GET</span> /clientes/[id]/extrato</div>
+    <p>Floods the system with statement requests. Evaluates read throughput, index efficiency, and caching strategies under extreme duress.</p>
+    <div class="progress-container">
+      <div class="progress-label" style="color: var(--term-green);">System Load [||||||||..........] 40%</div>
+    </div>
   </div>
 </section>
 
@@ -59,15 +50,6 @@ const stressTestMetrics = [
     Validated under extreme load conditions using k6 and xk6. The suite measures throughput, latency,
     and correctness across all Rinha de Backend implementations.
   </p>
-
-  <div class="stress-metrics">
-    {stressTestMetrics.map(metric => (
-      <div class="stress-metric">
-        <span class="metric-value">{metric.value}</span>
-        <span class="metric-label">{metric.label}</span>
-      </div>
-    ))}
-  </div>
 
   <div class="stress-links">
     <a href="https://github.com/jonathanperis/rinha2-back-end-k6/actions/workflows/main-release.yml" class="stress-link" target="_blank" rel="noopener noreferrer">
