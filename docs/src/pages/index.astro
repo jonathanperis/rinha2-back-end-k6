@@ -1,0 +1,21 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Navbar from '@/components/home/Navbar.astro';
+import Hero from '@/components/home/Hero.astro';
+import Dashboard from '@/components/home/Dashboard.astro';
+import Footer from '@/components/home/Footer.astro';
+
+const title = 'rinha2-back-end-k6 | Stress Test Suite';
+const description = 'Grafana k6 stress test suite for the Rinha de Backend 2024/Q1 challenge. xk6 + JavaScript, 5 scenarios, 47k+ requests, custom Trend metrics, InfluxDB + Grafana observability.';
+---
+
+<BaseLayout title={title} description={description}>
+  <Navbar />
+
+  <main>
+    <Hero />
+    <Dashboard />
+  </main>
+
+  <Footer />
+</BaseLayout>

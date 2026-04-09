@@ -1,0 +1,102 @@
+---
+---
+
+<section id="ci-cd" class="doc-section">
+  <h1>CI/CD</h1>
+  <p>
+    The repository uses three GitHub Actions workflows covering Docker image release,
+    GitHub Pages deployment, and security analysis.
+  </p>
+
+  <h2>Workflows</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Workflow</th>
+        <th>Trigger</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>main-release.yml</strong></td>
+        <td>Push to <code>main</code></td>
+        <td>Build + push multi-platform Docker image to GHCR</td>
+      </tr>
+      <tr>
+        <td><strong>deploy.yml</strong></td>
+        <td>Push to <code>main</code></td>
+        <td>Build Astro docs site and deploy to GitHub Pages</td>
+      </tr>
+      <tr>
+        <td><strong>codeql.yml</strong></td>
+        <td>Push / PR / weekly</td>
+        <td>CodeQL security and quality analysis</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>main-release.yml</h2>
+  <p>
+    Builds the xk6 Docker image for both <code>linux/amd64</code> and <code>linux/arm64/v8</code>
+    using <code>docker buildx</code> and pushes to the GitHub Container Registry:
+  </p>
+  <pre><code>ghcr.io/jonathanperis/rinha2-back-end-k6:latest
+ghcr.io/jonathanperis/rinha2-back-end-k6:&#123;sha&#125;</code></pre>
+  <p>
+    Sibling repos (<a href="https://github.com/jonathanperis/rinha2-back-end-rust" target="_blank" rel="noopener noreferrer">Rust</a>,
+    <a href="https://github.com/jonathanperis/rinha2-back-end-go" target="_blank" rel="noopener noreferrer">Go</a>,
+    <a href="https://github.com/jonathanperis/rinha2-back-end-dotnet" target="_blank" rel="noopener noreferrer">.NET</a>,
+    <a href="https://github.com/jonathanperis/rinha2-back-end-python" target="_blank" rel="noopener noreferrer">Python</a>)
+    pull this image in their own CI/CD pipelines to run the full stress test after each release.
+  </p>
+
+  <h2>deploy.yml</h2>
+  <p>
+    Builds the Astro docs site with <code>npm ci &amp;&amp; npm run build</code> and uploads the
+    <code>docs/out/</code> directory to GitHub Pages:
+  </p>
+  <pre><code>- uses: actions/setup-node@v6
+  with:
+    node-version: '22'
+    cache: 'npm'
+    cache-dependency-path: docs/package-lock.json
+
+- name: Install dependencies
+  run: npm ci
+  working-directory: docs
+
+- name: Build
+  run: npm run build
+  working-directory: docs
+  env:
+    PUBLIC_GA_ID: $&#123;&#123; secrets.PUBLIC_GA_ID &#125;&#125;
+
+- uses: actions/upload-pages-artifact@v4
+  with:
+    path: docs/out/</code></pre>
+
+  <h2>codeql.yml</h2>
+  <p>
+    Runs <a href="https://codeql.github.com/" target="_blank" rel="noopener noreferrer">GitHub CodeQL</a>
+    analysis on every push to <code>main</code>, on every pull request, and on a weekly schedule.
+    It scans the JavaScript test code for security vulnerabilities and code quality issues.
+  </p>
+
+  <h2>Branch Protection</h2>
+  <p>
+    All changes to <code>main</code> must go through a <strong>pull request</strong>.
+    Direct pushes to <code>main</code> are disabled. PRs use <strong>rebase merge only</strong>
+    (squash and merge commits are disabled).
+  </p>
+
+  <h2>Docker Image Registry</h2>
+  <p>
+    The published image is publicly available at:
+  </p>
+  <pre><code>docker pull ghcr.io/jonathanperis/rinha2-back-end-k6:latest</code></pre>
+  <p>
+    No authentication is required to pull. The image is rebuilt and re-tagged on every
+    push to <code>main</code>.
+  </p>
+</section>

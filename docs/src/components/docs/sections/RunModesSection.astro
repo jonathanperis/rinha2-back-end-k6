@@ -1,0 +1,95 @@
+---
+---
+
+<section id="run-modes" class="doc-section">
+  <h1>Run Modes</h1>
+  <p>
+    The suite supports two output modes controlled by the <code>MODE</code> environment variable.
+    Both modes run the same 5 scenarios — only the output destination differs.
+  </p>
+
+  <h2>prod — HTML Report</h2>
+  <p>
+    The default mode. k6 runs the full test suite and generates a self-contained
+    <strong>HTML report</strong> at the end. This is used in CI/CD workflows where the
+    report is archived as a build artifact or published to GitHub Pages.
+  </p>
+  <pre><code># Run with prod mode (default)
+docker compose up k6 --build --force-recreate
+
+# Or directly:
+k6 run -e MODE=prod test/stress-test/rinha-test.js</code></pre>
+
+  <p>The HTML report includes:</p>
+  <ul>
+    <li>Request rate, VU count, and iteration timeline</li>
+    <li>HTTP response time percentiles (p50, p90, p95, p99)</li>
+    <li>Per-scenario breakdown</li>
+    <li>Custom Trend metric charts (all 5 named metrics)</li>
+    <li>Check pass/fail counts</li>
+  </ul>
+
+  <h2>dev — InfluxDB + Grafana</h2>
+  <p>
+    Development mode streams all metrics in real time to <strong>InfluxDB</strong>,
+    which is visualised in <strong>Grafana</strong> via a pre-configured dashboard.
+    This is ideal for iterative tuning — you can watch latency graphs live as you
+    adjust the API under test.
+  </p>
+  <pre><code># Start the full dev stack (k6 + InfluxDB + Grafana)
+MODE=dev docker compose up --build
+
+# Or pass variables explicitly:
+k6 run \
+  -e MODE=dev \
+  -e K6_INFLUXDB_ADDR=http://localhost:8086 \
+  test/stress-test/rinha-test.js</code></pre>
+
+  <h2>Dev Stack Services</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Port</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>k6</strong></td>
+        <td>—</td>
+        <td>Runs test scenarios, streams metrics to InfluxDB</td>
+      </tr>
+      <tr>
+        <td><strong>InfluxDB</strong></td>
+        <td>8086</td>
+        <td>Time-series storage for k6 metrics</td>
+      </tr>
+      <tr>
+        <td><strong>Grafana</strong></td>
+        <td>3000</td>
+        <td>Real-time dashboards (k6 + system metrics)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>run-test.sh</h2>
+  <p>
+    A convenience shell script at <code>test/stress-test/run-test.sh</code> wraps the
+    <code>k6 run</code> invocation with the correct flags, handling both modes and
+    setting <code>BASE_URL</code> from the first argument (defaulting to <code>http://localhost:9999</code>):
+  </p>
+  <pre><code>./test/stress-test/run-test.sh http://localhost:9999</code></pre>
+
+  <h2>Docker Image</h2>
+  <p>
+    The Dockerfile uses a <strong>multi-stage build</strong>:
+  </p>
+  <ol>
+    <li><strong>Stage 1</strong> — <code>golang:1.25-alpine</code>: builds xk6 with the InfluxDB output extension</li>
+    <li><strong>Stage 2</strong> — <code>alpine:3.23</code>: copies the compiled <code>k6</code> binary and test scripts</li>
+  </ol>
+  <p>The final image is minimal (~30MB) and published as:</p>
+  <pre><code>ghcr.io/jonathanperis/rinha2-back-end-k6:latest</code></pre>
+  <p>Supported platforms: <code>linux/amd64</code>, <code>linux/arm64/v8</code>.</p>
+</section>

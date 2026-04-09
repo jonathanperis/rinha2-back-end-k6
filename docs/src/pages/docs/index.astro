@@ -1,0 +1,30 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import DocPageIsland from '@/components/docs/DocPageIsland';
+import OverviewSection from '@/components/docs/sections/OverviewSection.astro';
+import TestScenariosSection from '@/components/docs/sections/TestScenariosSection.astro';
+import ConfigurationSection from '@/components/docs/sections/ConfigurationSection.astro';
+import RunModesSection from '@/components/docs/sections/RunModesSection.astro';
+import CiCdSection from '@/components/docs/sections/CiCdSection.astro';
+
+const title = 'rinha2-back-end-k6 | Documentation';
+const description = 'Documentation for the Grafana k6 stress test suite for the Rinha de Backend 2024/Q1 challenge. Test scenarios, configuration, run modes, and CI/CD pipeline.';
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="docs-layout">
+    <!-- Interactive island: sidebar + search + scrollspy (sidebar only, no content wrapping) -->
+    <DocPageIsland client:load />
+
+    <!-- Static content: all doc sections rendered as plain Astro HTML -->
+    <div class="content-wrapper">
+      <main class="content" id="mainContent">
+        <OverviewSection />
+        <TestScenariosSection />
+        <ConfigurationSection />
+        <RunModesSection />
+        <CiCdSection />
+      </main>
+    </div>
+  </div>
+</BaseLayout>
