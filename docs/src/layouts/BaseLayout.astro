@@ -1,5 +1,6 @@
 ---
 import '../styles/globals.css';
+import Analytics from '../components/Analytics.astro';
 
 interface Props {
   title?: string;
@@ -10,8 +11,6 @@ const {
   title = 'rinha2-back-end-k6 | IT WORKED ON YOUR MACHINE. NOT ON OURS.',
   description = 'Grafana k6 stress test suite for the Rinha de Backend 2024/Q1 challenge. xk6 + JavaScript, 5 scenarios, 47k+ requests, custom Trend metrics.'
 } = Astro.props;
-
-const GA_ID = import.meta.env.PUBLIC_GA_ID;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -62,17 +61,9 @@ const jsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <title>{title}</title>
+    <Analytics />
   </head>
   <body>
-    <!-- Google Analytics -->
-    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}></script>
-    <script is:inline define:vars={{ GA_ID }}>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', GA_ID);
-    </script>
-
     <slot />
   </body>
 </html>
