@@ -14,7 +14,7 @@ The repository uses three GitHub Actions workflows covering Docker image release
 
 Builds the xk6 Docker image for both `linux/amd64` and `linux/arm64/v8` using `docker buildx` and pushes to the GitHub Container Registry:
 
-```
+```text
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ghcr.io/jonathanperis/rinha2-back-end-k6:{sha}
 ```
@@ -59,7 +59,7 @@ All changes to `main` must go through a **pull request**. Direct pushes to `main
 
 The published image is publicly available at:
 
-```
+```sh
 docker pull ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
