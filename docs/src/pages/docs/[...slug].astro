@@ -1,14 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import '../../styles/docs.css';
-
-const SECTION_CATEGORIES = [
-  { label: '', ids: ['home'] },
-  { label: 'Testing', ids: ['test-scenarios', 'configuration', 'run-modes'] },
-  { label: 'CI/CD', ids: ['ci-cd'] },
-];
-
-const SECTION_ORDER = SECTION_CATEGORIES.flatMap(({ ids }) => ids);
+import { SECTION_CATEGORIES, SECTION_ORDER } from './sidebar.config';
 
 const SLUG_LABEL: Record<string, string> = {
   home: 'Home',
