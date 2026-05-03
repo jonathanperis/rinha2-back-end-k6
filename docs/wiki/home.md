@@ -21,7 +21,7 @@ This k6 suite is the single source of truth for stress testing — shared across
 
 ## Repository Structure
 
-```
+```text
 rinha2-back-end-k6/
 ├── test/stress-test/
 │   ├── rinha-test.js       # Main test file (~318 lines, 5 scenarios)
@@ -38,13 +38,13 @@ rinha2-back-end-k6/
 
 The test suite is published as a multi-platform Docker image (amd64 and arm64/v8) to the GitHub Container Registry:
 
-```
+```text
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
 Sibling repos pull this image in their `docker-compose.yml` to run the full stress test:
 
-```
+```sh
 docker compose up k6 --build --force-recreate
 ```
 

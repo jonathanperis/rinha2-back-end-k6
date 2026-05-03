@@ -47,10 +47,10 @@ k6 run \
 
 ## run-test.sh
 
-A convenience shell script at `test/stress-test/run-test.sh` wraps the `k6 run` invocation with the correct flags, handling both modes and setting `BASE_URL` from the first argument (defaulting to `http://localhost:9999`):
+A convenience shell script at `test/stress-test/run-test.sh` wraps the `k6 run` invocation for `MODE` handling:
 
 ```sh
-./test/stress-test/run-test.sh http://localhost:9999
+./test/stress-test/run-test.sh
 ```
 
 ## Docker Image
@@ -62,7 +62,7 @@ The Dockerfile uses a **multi-stage build**:
 
 The final image is minimal (~30MB) and published as:
 
-```
+```text
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
