@@ -1,65 +1,101 @@
 # Test Scenarios
 
-The test suite defines **5 scenarios** that run sequentially and in parallel, covering both correctness validation and high-throughput load generation. All scenarios target the same `BASE_URL` (default: `http://localhost:9999`).
+The suite defines **5 source-backed k6 scenarios**. They all target `BASE_URL`, which defaults to `http://localhost:9999` in `rinha-test.js`.
 
-## Scenario Overview
+## Scenario overview
 
-| Scenario | VUs | Iterations / Duration | Start Time | Purpose |
-|----------|-----|----------------------|------------|---------|
-| **validacoes** | 5 | 1 iter each | 0s | Edge-case validation (invalid inputs, 404, 422) |
-| **cliente_nao_encontrado** | 1 | 1 iter | 0s | Validates 404 for unknown client IDs |
-| **debitos** | 1 → 220 | 4 min ramp | 10s | High-concurrency debit transactions |
-| **creditos** | 1 → 110 | 4 min ramp | 10s | High-concurrency credit transactions |
-| **extratos** | 10 | 1 iter each | After load | Final balance/statement consistency check |
+| Scenario | Executor | VUs / stages | Start | Purpose |
+|----------|----------|--------------|-------|---------|
+| `validacoes` | `per-vu-iterations` | 5 VUs, 1 iteration each | `0s` | Baseline statement, credit, debit, recent-transaction order, and invalid-request checks |
+| `cliente_nao_encontrado` | `per-vu-iterations` | 1 VU, 1 iteration | `0s` | `GET /clientes/6/extrato` must return `404` |
+| `debitos` | `ramping-vus` | 1 to 220 VUs over 2m, then hold 220 for 2m | `10s` | High-concurrency debit transactions with overdraft validation |
+| `creditos` | `ramping-vus` | 1 to 110 VUs over 2m, then hold 110 for 2m | `10s` | High-concurrency credit transactions |
+| `extratos` | `per-vu-iterations` | 10 VUs, 1 iteration each | `10s` | Statement reads and balance-limit consistency |
 
-## validacoes
+## `validacoes`
 
-Runs 5 VUs concurrently, each executing 1 iteration of edge-case checks:
+Runs one virtual user per configured client in `saldosIniciaisClientes`. Each VU checks the full client workflow:
 
-- Debit exceeding client limit → expects `422`
-- Invalid transaction type → expects `422`
-- Missing description field → expects `422`
-- Description too long (>10 chars) → expects `422`
-- Empty description → expects `422`
+1. `GET /clientes/{id}/extrato`, expecting status `200`, the configured limit, and initial balance `0`.
+2. `POST /clientes/{id}/transacoes` with credit `{ valor: 1, tipo: 'c', descricao: 'toma' }`.
+3. `POST /clientes/{id}/transacoes` with debit `{ valor: 1, tipo: 'd', descricao: 'devolve' }`.
+4. `GET /clientes/{id}/extrato`, expecting recent transactions in the debit-then-credit order.
+5. Invalid transaction requests, expecting `422` or `400` depending on implementation behavior.
 
-## cliente_nao_encontrado
+Invalid request cases:
 
-Single VU, single iteration. Sends requests to client IDs `0`, `6`, and `999` — all of which must return `404 Not Found`.
+| Payload issue | Expected status |
+|---------------|-----------------|
+| Decimal `valor` | `422` or `400` |
+| Invalid `tipo` | `422` or `400` |
+| Description longer than 10 characters | `422` or `400` |
+| Empty description | `422` or `400` |
+| `null` description | `422` or `400` |
 
-## debitos
+## `cliente_nao_encontrado`
 
-The primary load scenario. Ramps from **1 to 220 VUs** over 4 minutes, continuously posting debit transactions to randomly selected clients (IDs 1–5). After each debit, the response body is validated:
+Runs a single statement request against client `6`:
 
-```js
-// Balance must never go below the negative of the limit
-check(res, {
-  'debit balance valid': (r) => r.json().saldo >= r.json().limite * -1,
-});
+```http
+GET /clientes/6/extrato
 ```
 
-## creditos
+The expected result is `404`. This keeps missing-client behavior visible as a separate metric instead of hiding it inside the general validation flow.
 
-Parallel to debitos. Ramps from **1 to 110 VUs** over 4 minutes, posting credit transactions to randomly selected clients. Credits cannot fail due to insufficient funds, so this scenario validates basic HTTP correctness (`200`) and response shape.
+## `debitos`
 
-## extratos
-
-Final consistency check. After the load scenarios complete, 10 VUs each request the account statement (`GET /clientes/{id}/extrato`) for one client. Validates that:
-
-- Response is `200 OK`
-- `saldo.total` is a number
-- `ultimas_transacoes` is an array
-- Balance is consistent with the limit (`saldo.total >= saldo.limite * -1`)
-
-## Custom Trend Metrics
-
-The test file defines **5 custom Trend metrics** to track p95/p99 latency broken down by operation type:
+The debit workload ramps from **1 to 220 VUs**, holds that target, and posts random debit transactions to clients `1` through `5`.
 
 ```js
-const transacaoTrend    = new Trend('transacao_duration');
-const extratoTrend      = new Trend('extrato_duration');
-const validacaoTrend    = new Trend('validacao_duration');
-const notFoundTrend     = new Trend('not_found_duration');
-const consistencyTrend  = new Trend('consistency_duration');
+stages: [
+  { duration: '2m', target: 220 },
+  { duration: '2m', target: 220 },
+]
 ```
 
-These appear as separate metrics in Grafana and the HTML report, making it easy to identify which operation type is the bottleneck.
+Accepted response statuses are `200` or `422`, because debit operations can be rejected when a client would exceed the overdraft limit. Successful debit responses are checked with:
+
+```js
+saldo >= limite * -1
+```
+
+## `creditos`
+
+The credit workload ramps from **1 to 110 VUs**, holds that target, and posts random credit transactions to clients `1` through `5`.
+
+```js
+stages: [
+  { duration: '2m', target: 110 },
+  { duration: '2m', target: 110 },
+]
+```
+
+Credits are expected to return `200` and preserve the same balance-limit consistency contract.
+
+## `extratos`
+
+Runs 10 VUs, one iteration each, against:
+
+```http
+GET /clientes/{id}/extrato
+```
+
+The response must be `200`, and `saldo.total` must still respect the configured limit:
+
+```js
+saldo.total >= saldo.limite * -1
+```
+
+## Custom Trend metrics
+
+The script exports five Trend metrics. These names are the canonical labels to use in reports and dashboards:
+
+| Metric | Scenario |
+|--------|----------|
+| `debitos_duration` | `debitos` |
+| `creditos_duration` | `creditos` |
+| `extratos_duration` | `extratos` |
+| `validacoes_duration` | `validacoes` |
+| `cliente_nao_encontrado_duration` | `cliente_nao_encontrado` |
+
+Each request path adds its observed duration to the scenario-specific Trend so Grafana and HTML reports can separate bottlenecks by operation type.
