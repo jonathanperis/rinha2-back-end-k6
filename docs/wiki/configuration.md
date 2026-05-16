@@ -1,70 +1,95 @@
 # Configuration
 
-The test suite is configured entirely through **environment variables**, making it easy to switch between local development and CI/CD production runs without modifying any test code.
+The suite is configured through environment variables and the exported `options` object in `test/stress-test/rinha-test.js`. Keep operational values in code, not in the docs, then use this page as the readable map.
 
-## Environment Variables
+## Environment variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MODE` | `prod` | Run mode: `prod` (HTML report) or `dev` (InfluxDB export) |
-| `BASE_URL` | `http://localhost:9999` | Base URL of the API under test (NGINX load balancer endpoint) |
-| `K6_INFLUXDB_ADDR` | — | InfluxDB address for dev mode (e.g. `http://influxdb:8086`) |
+| Variable | Default / required value | Description |
+|----------|--------------------------|-------------|
+| `BASE_URL` | `http://localhost:9999` | Base URL for the API under test, usually the NGINX/load-balancer endpoint. |
+| `MODE` | empty value behaves like `dev` in `run-test.sh` | Run mode selector. Use `prod` for quiet report-oriented runs or `dev` for InfluxDB export. |
+| `K6_INFLUXDB_ADDR` | required by the xk6 output when using dev mode | InfluxDB endpoint, for example `http://influxdb:8086`. |
 
-## Passing Variables
+## Docker run examples
 
-When running directly with k6:
+Build the local image:
+
+```sh
+docker build -t rinha-k6 .
+```
+
+Run against an API endpoint in production/report mode:
+
+```sh
+docker run --rm \
+  -e MODE=prod \
+  -e BASE_URL=http://api:9999 \
+  rinha-k6
+```
+
+Run with InfluxDB export in development mode:
+
+```sh
+docker run --rm \
+  -e MODE=dev \
+  -e BASE_URL=http://api:9999 \
+  -e K6_INFLUXDB_ADDR=http://influxdb:8086 \
+  rinha-k6
+```
+
+## Direct k6 invocation
+
+If you have the custom k6 binary available locally, pass variables with `-e`:
+
+```sh
+k6 run \
+  -e BASE_URL=http://localhost:9999 \
+  test/stress-test/rinha-test.js
+```
+
+For dev output, include the xk6 InfluxDB output:
 
 ```sh
 k6 run \
   -e MODE=dev \
   -e BASE_URL=http://localhost:9999 \
   -e K6_INFLUXDB_ADDR=http://localhost:8086 \
+  -o xk6-influxdb \
   test/stress-test/rinha-test.js
 ```
 
-When running via Docker Compose:
+## SharedArray client data
 
-```sh
-docker compose up k6 --build --force-recreate
-```
+`rinha-test.js` defines five clients and their credit limits in cents. k6 loads this data through `SharedArray` so VUs share one read-only copy:
 
-The `docker-compose.yml` passes environment variables to the k6 container automatically. Override them with a `.env` file or inline exports.
+| Client | Limit |
+|--------|-------|
+| `1` | `100000` |
+| `2` | `80000` |
+| `3` | `1000000` |
+| `4` | `10000000` |
+| `5` | `500000` |
 
-## SharedArray — Client Data
-
-Client data (IDs 1–5, with their credit limits) is loaded once at startup using k6's `SharedArray` to avoid redundant memory allocation across VUs:
-
-```js
-import { SharedArray } from 'k6/data';
-
-const clients = new SharedArray('clients', function () {
-  return [
-    { id: 1, limite: 100000 },
-    { id: 2, limite: 80000  },
-    { id: 3, limite: 1000000 },
-    { id: 4, limite: 10000000 },
-    { id: 5, limite: 500000 },
-  ];
-});
-```
+Those values drive the validation scenario and the balance-limit checks after debit and statement requests.
 
 ## Thresholds
 
-The suite does not enforce hard thresholds by default — it is designed to measure and report, not pass/fail CI. Each sibling implementation's own CI pipeline decides whether to treat threshold violations as failures.
+The current script does **not** define hard k6 thresholds. It measures and reports behavior; sibling implementations or CI jobs can decide whether to fail a pipeline based on their own policy.
 
-Custom thresholds can be added to the `options` export in `rinha-test.js`:
+If thresholds are added later, keep the metric names aligned with the exported Trend metrics:
 
 ```js
 export const options = {
   scenarios: { /* ... */ },
   thresholds: {
-    'transacao_duration': ['p(95)<500'],
-    'extrato_duration':   ['p(95)<200'],
-    http_req_failed:      ['rate<0.01'],
+    debitos_duration: ['p(95)<500'],
+    creditos_duration: ['p(95)<500'],
+    extratos_duration: ['p(95)<200'],
+    http_req_failed: ['rate<0.01'],
   },
 };
 ```
 
-## Resource Constraints
+## Resource boundaries
 
-The k6 container itself is intentionally kept **outside** the 1.5 CPU / 550MB RAM budget. Only the API services (2x webapi + NGINX + PostgreSQL) are constrained.
+The Rinha challenge constrains the backend services, not the k6 runner. Treat k6 as the external pressure source. The API stack under test is responsible for staying inside the challenge budget.

@@ -1,69 +1,89 @@
 # Run Modes
 
-The suite supports two output modes controlled by the `MODE` environment variable. Both modes run the same 5 scenarios — only the output destination differs.
+`test/stress-test/run-test.sh` selects the k6 output path from the `MODE` environment variable. The scenario profile is the same in both modes; only the output destination changes.
 
-## prod — HTML Report
+<div class="mode-grid" aria-label="run mode comparison">
+  <div>
+    <span class="signal-label">prod</span>
+    <strong>quiet report run</strong>
+    <p>Use in CI, release jobs, and repeatable local checks where the report artifact matters more than live telemetry.</p>
+  </div>
+  <div>
+    <span class="signal-label">dev</span>
+    <strong>InfluxDB stream</strong>
+    <p>Use while tuning an implementation and watching latency or throughput in Grafana.</p>
+  </div>
+</div>
 
-The default mode. k6 runs the full test suite and generates a self-contained **HTML report** at the end. This is used in CI/CD workflows where the report is archived as a build artifact or published to GitHub Pages.
+## `prod`: report-oriented run
+
+Set `MODE=prod` to run k6 quietly through the bundled entrypoint:
 
 ```sh
-# Run with prod mode (default)
-docker compose up k6 --build --force-recreate
-
-# Or directly:
-k6 run -e MODE=prod test/stress-test/rinha-test.js
+docker run --rm \
+  -e MODE=prod \
+  -e BASE_URL=http://api:9999 \
+  rinha-k6
 ```
 
-The HTML report includes:
-
-- Request rate, VU count, and iteration timeline
-- HTTP response time percentiles (p50, p90, p95, p99)
-- Per-scenario breakdown
-- Custom Trend metric charts (all 5 named metrics)
-- Check pass/fail counts
-
-## dev — InfluxDB + Grafana
-
-Development mode streams all metrics in real time to **InfluxDB**, which is visualised in **Grafana** via a pre-configured dashboard. This is ideal for iterative tuning — you can watch latency graphs live as you adjust the API under test.
+The entrypoint executes:
 
 ```sh
-# Start the full dev stack (k6 + InfluxDB + Grafana)
-MODE=dev docker compose up --build
+k6 run rinha-test.js --quiet
+```
 
-# Or pass variables explicitly:
-k6 run \
+Use this mode when the caller is collecting stdout, CI logs, or generated report artifacts outside the container.
+
+## `dev`: InfluxDB export
+
+Set `MODE=dev`, or leave `MODE` empty, to stream k6 metrics through the `xk6-output-influxdb` extension:
+
+```sh
+docker run --rm \
   -e MODE=dev \
-  -e K6_INFLUXDB_ADDR=http://localhost:8086 \
-  test/stress-test/rinha-test.js
+  -e BASE_URL=http://api:9999 \
+  -e K6_INFLUXDB_ADDR=http://influxdb:8086 \
+  rinha-k6
 ```
 
-## Dev Stack Services
-
-| Service | Port | Purpose |
-|---------|------|---------|
-| **k6** | — | Runs test scenarios, streams metrics to InfluxDB |
-| **InfluxDB** | 8086 | Time-series storage for k6 metrics |
-| **Grafana** | 3000 | Real-time dashboards (k6 + system metrics) |
-
-## run-test.sh
-
-A convenience shell script at `test/stress-test/run-test.sh` wraps the `k6 run` invocation for `MODE` handling:
+The entrypoint executes:
 
 ```sh
-./test/stress-test/run-test.sh
+k6 run rinha-test.js -o xk6-influxdb
 ```
 
-## Docker Image
+Use this mode when an InfluxDB target is available and you want Grafana-style feedback during a tuning loop.
 
-The Dockerfile uses a **multi-stage build**:
+## Mode behavior
 
-1. **Stage 1** — `golang:1.25-alpine`: builds xk6 with the InfluxDB output extension
-2. **Stage 2** — `alpine:3.23`: copies the compiled `k6` binary and test scripts
+| `MODE` value | Behavior |
+|--------------|----------|
+| `prod` | Runs `k6 run rinha-test.js --quiet`. |
+| `dev` | Runs `k6 run rinha-test.js -o xk6-influxdb`. |
+| empty | Treated as dev mode by `run-test.sh`. |
+| anything else | Fails fast with `Invalid MODE specified. Set MODE=dev or MODE=prod.` |
 
-The final image is minimal (~30MB) and published as:
+## Startup delay
+
+The entrypoint prints `Tests will start in 15 seconds...` and sleeps before launching k6. That delay gives the API stack under test time to finish booting when k6 is started alongside other services.
+
+## Docker image shape
+
+The Dockerfile uses two stages:
+
+1. `golang:1.25-alpine3.21` builds a custom k6 binary with `github.com/grafana/xk6-output-influxdb`.
+2. `alpine:3.23` copies the binary, `rinha-test.js`, and `run-test.sh` into `/app`.
+
+The image entrypoint is:
+
+```text
+/app/run-test.sh
+```
+
+Published image:
 
 ```text
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
-Supported platforms: `linux/amd64`, `linux/arm64/v8`.
+Supported platforms are published by the release workflow as `linux/amd64` and `linux/arm64`.

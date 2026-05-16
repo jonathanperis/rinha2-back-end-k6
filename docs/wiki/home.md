@@ -1,57 +1,103 @@
 # Home
 
-**rinha2-back-end-k6** is the shared Grafana k6 stress test suite for the [Rinha de Backend 2024/Q1](https://github.com/jonathanperis) challenge. It validates correctness and measures throughput for all API implementations under extreme concurrency.
+<div class="docs-hero">
+  <p class="eyebrow">operator notes / source-backed load profile</p>
+  <h1>Run the Rinha load suite without guessing what it measures.</h1>
+  <p class="hero-copy">A Docker-first Grafana k6 harness for Rinha de Backend 2024/Q1. It runs five banking API scenarios, records per-scenario Trend metrics, and switches between CI-friendly reports and live InfluxDB output.</p>
+  <div class="hero-actions">
+    <a class="action-primary" href="#quick-start">Run the suite</a>
+    <a class="action-secondary" href="https://github.com/jonathanperis/rinha2-back-end-k6">View source</a>
+  </div>
+</div>
 
-## What is Rinha de Backend?
+<div class="signal-grid" aria-label="k6 suite facts">
+  <div class="signal-card">
+    <span class="signal-label">scenarios</span>
+    <strong>5</strong>
+    <span>validation, 404, debit, credit, statement</span>
+  </div>
+  <div class="signal-card">
+    <span class="signal-label">peak write load</span>
+    <strong>220 + 110 VUs</strong>
+    <span>debit and credit ramping scenarios</span>
+  </div>
+  <div class="signal-card">
+    <span class="signal-label">outputs</span>
+    <strong>prod / dev</strong>
+    <span>HTML report or InfluxDB stream</span>
+  </div>
+</div>
 
-Rinha de Backend is a Brazilian backend engineering challenge where participants build a fictional banking API that handles concurrent credit/debit transactions with strict resource constraints: **1.5 CPU** and **550MB RAM** total across all services.
+## What this repository provides
 
-This k6 suite is the single source of truth for stress testing — shared across all sibling implementations (Rust, Go, .NET, Python).
+`rinha2-back-end-k6` is the shared stress-test harness for the [Rinha de Backend 2024/Q1](https://github.com/zanfranceschi/rinha-de-backend-2024-q1) fictional banking API challenge. It packages a custom k6 binary with `xk6-output-influxdb`, the scenario script, and a small shell entrypoint into a reusable Docker image.
 
-## Tech Stack
+The docs are intentionally source-backed. Scenario counts, VU targets, metric names, defaults, and run modes should match `test/stress-test/rinha-test.js` and `test/stress-test/run-test.sh`.
 
-| Technology | Purpose |
-|-----------|---------|
-| `Grafana k6` | Load testing engine |
-| `xk6` | Custom k6 build with InfluxDB output extension |
-| `JavaScript (ES2015+)` | Test script language |
-| `Docker / Alpine 3.23` | Container runtime |
-| `InfluxDB` | Time-series metrics storage (dev mode) |
-| `Grafana` | Real-time dashboard for metrics |
+<h2 id="quick-start">Quick start</h2>
 
-## Repository Structure
+Build and run the image locally:
+
+```sh
+docker build -t rinha-k6 .
+
+docker run --rm \
+  -e MODE=prod \
+  -e BASE_URL=http://api:9999 \
+  rinha-k6
+```
+
+Use dev mode when you have an InfluxDB endpoint ready for k6 metrics:
+
+```sh
+docker run --rm \
+  -e MODE=dev \
+  -e BASE_URL=http://api:9999 \
+  -e K6_INFLUXDB_ADDR=http://influxdb:8086 \
+  rinha-k6
+```
+
+> `run-test.sh` treats `MODE=dev` or an empty `MODE` as InfluxDB export mode. Set `MODE=prod` explicitly when you want the quiet CI/report path.
+
+## Scenario map
+
+<div class="scenario-strip" aria-label="scenario sequence">
+  <div><code>validacoes</code><span>5 VUs, one pass</span></div>
+  <div><code>cliente_nao_encontrado</code><span>1 VU, 404 check</span></div>
+  <div><code>debitos</code><span>1 to 220 VUs</span></div>
+  <div><code>creditos</code><span>1 to 110 VUs</span></div>
+  <div><code>extratos</code><span>10 VUs, statement read</span></div>
+</div>
+
+## Repository structure
 
 ```text
 rinha2-back-end-k6/
 ├── test/stress-test/
-│   ├── rinha-test.js       # Main test file (~318 lines, 5 scenarios)
-│   └── run-test.sh         # Helper script to invoke k6
-├── Dockerfile              # Multi-stage: Go 1.25 + xk6 → Alpine 3.23
-├── docker-compose.yml      # Dev stack (InfluxDB + Grafana)
+│   ├── rinha-test.js       # Main k6 file, 5 scenarios and 5 Trend metrics
+│   └── run-test.sh         # MODE dispatcher for prod/dev runs
+├── Dockerfile              # Go/xk6 builder plus Alpine runtime
+├── docs/                   # Astro docs site published to GitHub Pages
 └── .github/workflows/
-    ├── main-release.yml    # Build + push multi-platform Docker image
-    ├── deploy.yml          # GitHub Pages deployment
-    └── codeql.yml          # Security analysis
+    ├── main-release.yml    # Build and push GHCR image
+    ├── deploy.yml          # Reusable GitHub Pages deploy workflow
+    └── codeql.yml          # JavaScript CodeQL analysis
 ```
 
-## Docker Image
+## Docker image
 
-The test suite is published as a multi-platform Docker image (amd64 and arm64/v8) to the GitHub Container Registry:
+The release workflow publishes a multi-platform image to GitHub Container Registry:
 
 ```text
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
-Sibling repos pull this image in their `docker-compose.yml` to run the full stress test:
+Sibling Rinha implementations can run the same test image against their own `BASE_URL` so the load profile stays consistent across languages and backends.
 
-```sh
-docker compose up k6 --build --force-recreate
-```
+## Key design patterns
 
-## Key Design Patterns
-
-- **SharedArray** — client data loaded once, shared across all VUs for efficiency
-- **Custom Trend metrics** — 5 named Trend metrics track latency per endpoint type
-- **Staggered start** — validation scenarios run at 0s; load scenarios ramp from 10s
-- **Balance validation** — checks `saldo >= limite * -1` after each debit
-- **Dual output mode** — `prod` generates an HTML report; `dev` streams to InfluxDB
+- **SharedArray client data:** client IDs and limits are loaded once and shared across VUs.
+- **Custom Trend metrics:** each scenario writes to its own duration metric.
+- **Staggered start:** validation and 404 probes start at `0s`; load and statement scenarios start at `10s`.
+- **Balance validation:** debit and statement checks assert that balances do not exceed the negative limit.
+- **Dual output mode:** `prod` is report-oriented; `dev` streams to InfluxDB for Grafana dashboards.
