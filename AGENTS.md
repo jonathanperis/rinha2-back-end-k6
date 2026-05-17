@@ -1,4 +1,4 @@
-# Rinha de Backend K6 — Claude Code Guide
+# Rinha de Backend K6 — Agent Guide
 
 Grafana k6 load testing suite for the Rinha de Backend 2024/Q1 challenge. Shared across all backend implementations (Rust, .NET, Go, Python).
 
@@ -20,9 +20,9 @@ Grafana k6 load testing suite for the Rinha de Backend 2024/Q1 challenge. Shared
 ## Run Commands
 
 ```sh
-docker build -t rinha-k6 .                                      # Build
-docker run --rm -e BASE_URL=http://api:9999 rinha-k6             # Run (prod mode)
-docker run --rm -e MODE=dev -e K6_INFLUXDB_ADDR=http://influx:8086 rinha-k6  # Dev mode
+docker build -t rinha-k6 .
+docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
+docker run --rm -e MODE=dev -e BASE_URL=http://api:9999 -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6
 ```
 
 ---
@@ -43,8 +43,8 @@ docker run --rm -e MODE=dev -e K6_INFLUXDB_ADDR=http://influx:8086 rinha-k6  # D
 
 | Mode | Output | Use Case |
 |------|--------|----------|
-| `prod` | HTML report (stdout) | CI/CD pipeline |
-| `dev` | InfluxDB export | Real-time monitoring with Grafana |
+| `prod` | quiet k6 CLI output (`k6 run rinha-test.js --quiet`) | CI/CD logs and repeatable checks |
+| `dev` or empty | InfluxDB export (`k6 run rinha-test.js -o xk6-influxdb`) | Real-time monitoring with Grafana |
 
 ---
 
@@ -64,14 +64,14 @@ docker run --rm -e MODE=dev -e K6_INFLUXDB_ADDR=http://influx:8086 rinha-k6  # D
 rinha2-back-end-k6/
 ├── test/stress-test/
 │   ├── rinha-test.js    # Main test suite (318 lines, 5 scenarios)
-│   └── run-test.sh      # Mode dispatcher (dev/prod)
+│   └── run-test.sh      # Mode dispatcher (dev/prod) plus 15s startup delay
 ├── Dockerfile            # Multi-stage: Go 1.25 + xk6 → Alpine 3.23
 ├── .github/workflows/
 │   ├── main-release.yml  # Docker build + push to GHCR
 │   ├── deploy.yml        # Deploy docs to GitHub Pages
 │   └── codeql.yml        # Security scanning
-├── docs/                 # Generated documentation site
-└── wiki/                 # Source wiki pages
+├── docs/wiki/            # Source Markdown for public docs routes
+└── docs/                 # Astro documentation site
 ```
 
 ---
@@ -80,7 +80,7 @@ rinha2-back-end-k6/
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `MODE` | `dev` | Execution mode (dev/prod) |
+| `MODE` | empty behaves like `dev` | Execution mode (`prod` for quiet CLI, `dev` for InfluxDB export) |
 | `BASE_URL` | `http://localhost:9999` | Target API endpoint |
 | `K6_INFLUXDB_ADDR` | — | InfluxDB address (dev mode) |
 
@@ -88,11 +88,17 @@ rinha2-back-end-k6/
 
 ## CI/CD
 
-- **Main:** Multi-platform Docker build (amd64/arm64) → push to GHCR
+- **Main:** Multi-platform Docker build (`linux/amd64`, `linux/arm64/v8`) → push to GHCR
 - **Image:** `ghcr.io/jonathanperis/rinha2-back-end-k6:latest`
-- **Docs:** Wiki auto-converted to HTML → GitHub Pages
+- **Docs:** Astro site under `docs/` builds from `docs/wiki/` → GitHub Pages
 
 ---
+
+## Standardized Agent Instructions
+
+- Use this `AGENTS.md` file as the repository-level harness instructions.
+- Use only the standardized `AGENTS.md` and `./.agents/` instruction sources so every agent harness reads the same content.
+- Keep `AGENTS.md` and `./.agents/` source-backed when code, workflows, docs routes, or run modes change.
 
 ## Workflow & Conventions
 
