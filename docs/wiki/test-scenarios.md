@@ -1,6 +1,6 @@
 # Test Scenarios
 
-The suite defines **5 source-backed k6 scenarios**. They all target `BASE_URL`, which defaults to `http://localhost:9999` in `rinha-test.js`.
+The suite defines **5 source-backed k6 scenarios** in the 318-line `test/stress-test/rinha-test.js`. They all target `BASE_URL`, which defaults to `http://localhost:9999`.
 
 ## Scenario overview
 
@@ -86,6 +86,17 @@ The response must be `200`, and `saldo.total` must still respect the configured 
 saldo.total >= saldo.limite * -1
 ```
 
+## Source-backed constants
+
+The current script uses these fixed helper values:
+
+| Constant | Current value | Source |
+|----------|---------------|--------|
+| Random client IDs | `1` through `5` | `randomClienteId()` |
+| Random transaction value | integer `1` through `10000` | `randomValorTransacao()` |
+| Random generated description | 10 alphanumeric characters | `randomDescricao()` |
+| Validation delay | `sleep(1)` before the second statement check | `validacoes()` |
+
 ## Custom Trend metrics
 
 The script exports five Trend metrics. These names are the canonical labels to use in reports and dashboards:
@@ -98,4 +109,4 @@ The script exports five Trend metrics. These names are the canonical labels to u
 | `validacoes_duration` | `validacoes` |
 | `cliente_nao_encontrado_duration` | `cliente_nao_encontrado` |
 
-Each request path adds its observed duration to the scenario-specific Trend so Grafana and HTML reports can separate bottlenecks by operation type.
+Each request path adds its observed duration to the scenario-specific Trend so Grafana dashboards and k6 summaries can separate bottlenecks by operation type.

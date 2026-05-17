@@ -16,7 +16,7 @@ docker build -t rinha-k6 .
 # Dev run (InfluxDB metrics) — this is the default mode
 docker run --rm -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6
 
-# Production run (HTML report)
+# Production/CI run (quiet k6 output)
 docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
 ```
 
@@ -31,11 +31,11 @@ docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
 ## Modes
 
 - **dev** (default): Exports metrics to InfluxDB for real-time monitoring in Grafana dashboards
-- **prod**: Runs quietly and produces an HTML report
+- **prod**: Runs `k6 run rinha-test.js --quiet` for a quieter CI/log path. The entrypoint does not write an HTML artifact by itself.
 
 ## Run with a Backend
 
-The k6 service is included in each backend implementation's docker-compose.yml. Start any backend and k6 runs automatically:
+Sibling backend implementations can include this image as their k6 service in `docker-compose.yml`. Start a backend stack that wires `BASE_URL` to its API/load-balancer endpoint:
 
 ```bash
 # Example: run with the .NET implementation
