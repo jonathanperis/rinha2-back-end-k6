@@ -26,13 +26,13 @@ The test suite (`test/stress-test/rinha-test.js`, 318 lines) implements 5 scenar
 ## Key Validation Rules
 
 - **Balance consistency**: `saldo >= limite * -1` (never exceed negative limit)
-- **Transaction ordering**: Last 10 transactions returned in descending order by ID
-- **Invalid request tests**: Decimal valor (1.2), invalid tipo ('x'), >10 char descricao, empty descricao, null descricao → all must return 422
+- **Recent transaction ordering**: Validation checks that the second statement shows the debit (`devolve`) before the credit (`toma`) in `ultimas_transacoes`
+- **Invalid request tests**: Decimal valor (1.2), invalid tipo ('x'), >10 char descricao, empty descricao, null descricao → all must return 422 or 400 depending on implementation behavior
 
 ## Dual Execution Modes
 
 - **dev mode**: `k6 run -o xk6-influxdb` — exports real-time metrics to InfluxDB for Grafana dashboards
-- **prod mode**: `k6 run --quiet` — generates HTML report for CI/CD artifacts
+- **prod mode**: `k6 run --quiet` — quiet k6 CLI output for CI logs; the entrypoint does not create an HTML artifact by itself
 
 ## SharedArray Pattern
 
