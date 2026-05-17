@@ -7,7 +7,7 @@ The suite is configured through environment variables and the exported `options`
 | Variable | Default / required value | Description |
 |----------|--------------------------|-------------|
 | `BASE_URL` | `http://localhost:9999` | Base URL for the API under test, usually the NGINX/load-balancer endpoint. |
-| `MODE` | empty value behaves like `dev` in `run-test.sh` | Run mode selector. Use `prod` for quiet report-oriented runs or `dev` for InfluxDB export. |
+| `MODE` | empty value behaves like `dev` in `run-test.sh` | Run mode selector. Use `prod` for quiet CI/log runs or `dev` for InfluxDB export. |
 | `K6_INFLUXDB_ADDR` | required by the xk6 output when using dev mode | InfluxDB endpoint, for example `http://influxdb:8086`. |
 
 ## Docker run examples
@@ -18,7 +18,7 @@ Build the local image:
 docker build -t rinha-k6 .
 ```
 
-Run against an API endpoint in production/report mode:
+Run against an API endpoint in production/CI mode:
 
 ```sh
 docker run --rm \
@@ -89,6 +89,18 @@ export const options = {
   },
 };
 ```
+
+## Entrypoint behavior
+
+`run-test.sh` waits 15 seconds before starting k6 so a backend stack launched in the same Compose project can finish booting. It accepts only three effective states:
+
+| `MODE` value | Command |
+|--------------|---------|
+| `prod` | `k6 run rinha-test.js --quiet` |
+| `dev` | `k6 run rinha-test.js -o xk6-influxdb` |
+| empty | same as `dev` |
+
+Any other value exits with `Invalid MODE specified. Set MODE=dev or MODE=prod.`
 
 ## Resource boundaries
 

@@ -5,8 +5,8 @@
 <div class="mode-grid" aria-label="run mode comparison">
   <div>
     <span class="signal-label">prod</span>
-    <strong>quiet report run</strong>
-    <p>Use in CI, release jobs, and repeatable local checks where the report artifact matters more than live telemetry.</p>
+    <strong>quiet CI/log run</strong>
+    <p>Use in CI, release jobs, and repeatable local checks where lower-noise k6 logs matter more than live telemetry.</p>
   </div>
   <div>
     <span class="signal-label">dev</span>
@@ -15,7 +15,7 @@
   </div>
 </div>
 
-## `prod`: report-oriented run
+## `prod`: quiet CI/log run
 
 Set `MODE=prod` to run k6 quietly through the bundled entrypoint:
 
@@ -32,7 +32,7 @@ The entrypoint executes:
 k6 run rinha-test.js --quiet
 ```
 
-Use this mode when the caller is collecting stdout, CI logs, or generated report artifacts outside the container.
+Use this mode when the caller is collecting stdout or CI logs outside the container. The current entrypoint does not create an HTML report file; it only passes `--quiet` to k6.
 
 ## `dev`: InfluxDB export
 
@@ -74,7 +74,7 @@ The Dockerfile uses two stages:
 1. `golang:1.25-alpine3.21` builds a custom k6 binary with `github.com/grafana/xk6-output-influxdb`.
 2. `alpine:3.23` copies the binary, `rinha-test.js`, and `run-test.sh` into `/app`.
 
-The image entrypoint is:
+The Dockerfile creates `/reports`, but the current script does not write report files there. The image entrypoint is:
 
 ```text
 /app/run-test.sh
@@ -86,4 +86,4 @@ Published image:
 ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
-Supported platforms are published by the release workflow as `linux/amd64` and `linux/arm64`.
+Supported platforms are published by the release workflow as `linux/amd64` and `linux/arm64/v8`.
