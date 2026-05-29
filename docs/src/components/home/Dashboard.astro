@@ -3,43 +3,67 @@
 
 <section class="stats-grid">
   <div class="stat-box">
-    <div class="stat-label">Virtual Users</div>
-    <div class="stat-value">30,000</div>
-    <div class="stat-sub">Concurrent simulation</div>
+    <div class="stat-label">Scenarios</div>
+    <div class="stat-value">5</div>
+    <div class="stat-sub">Source-backed k6 executors</div>
   </div>
   <div class="stat-box warning">
-    <div class="stat-label">Ramp-up</div>
-    <div class="stat-value">500</div>
-    <div class="stat-sub">VUs over 3 mins</div>
+    <div class="stat-label">Debit Load</div>
+    <div class="stat-value">220</div>
+    <div class="stat-sub">Peak VUs, 2m ramp + 2m hold</div>
   </div>
   <div class="stat-box">
-    <div class="stat-label">Target</div>
-    <div class="stat-value">47k+</div>
-    <div class="stat-sub">Successful requests</div>
+    <div class="stat-label">Credit Load</div>
+    <div class="stat-value">110</div>
+    <div class="stat-sub">Peak VUs, 2m ramp + 2m hold</div>
   </div>
   <div class="stat-box danger">
-    <div class="stat-label">Test Duration</div>
-    <div class="stat-value">~3m</div>
-    <div class="stat-sub">Sustained chaos</div>
+    <div class="stat-label">Trend Metrics</div>
+    <div class="stat-value">5</div>
+    <div class="stat-sub">One duration series per scenario</div>
   </div>
 </section>
 
 <h2 class="section-title">TEST SCENARIOS</h2>
 <section class="scenarios">
   <div class="scenario-card">
-    <h3>Create Transaction</h3>
-    <div class="endpoint"><span class="method post">POST</span> /clientes/[id]/transacoes</div>
-    <p>Stress tests the transactional integrity of the banking system. Simulates massive concurrent deposits and withdrawals to trigger race conditions and test database locks.</p>
+    <h3>validacoes</h3>
+    <div class="endpoint"><span class="method get">GET</span> /clientes/[id]/extrato</div>
+    <p>Five VUs, one per configured client, verify initial limits, credit/debit consistency, recent transaction order, and invalid payload handling.</p>
     <div class="progress-container">
-      <div class="progress-label">System Load [||||||||||||||||||..] 90%</div>
+      <div class="progress-label">5 VUs · 1 iteration · starts at 0s</div>
     </div>
   </div>
   <div class="scenario-card">
-    <h3>Get Balance</h3>
-    <div class="endpoint"><span class="method get">GET</span> /clientes/[id]/extrato</div>
-    <p>Floods the system with statement requests. Evaluates read throughput, index efficiency, and caching strategies under extreme duress.</p>
+    <h3>cliente_nao_encontrado</h3>
+    <div class="endpoint"><span class="method get">GET</span> /clientes/6/extrato</div>
+    <p>One VU keeps missing-client behavior visible by asserting the non-existent client statement route returns 404.</p>
     <div class="progress-container">
-      <div class="progress-label" style="color: var(--term-green);">System Load [||||||||..........] 40%</div>
+      <div class="progress-label" style="color: var(--term-green);">1 VU · 1 iteration · starts at 0s</div>
+    </div>
+  </div>
+  <div class="scenario-card">
+    <h3>debitos</h3>
+    <div class="endpoint"><span class="method post">POST</span> /clientes/[id]/transacoes</div>
+    <p>Ramps debit transactions to 220 VUs, accepts 200 or overdraft 422 responses, and checks successful balances against the client limit.</p>
+    <div class="progress-container">
+      <div class="progress-label">1 → 220 VUs · 2m ramp + 2m hold</div>
+    </div>
+  </div>
+  <div class="scenario-card">
+    <h3>creditos</h3>
+    <div class="endpoint"><span class="method post">POST</span> /clientes/[id]/transacoes</div>
+    <p>Ramps credit transactions to 110 VUs and expects successful responses that preserve the same balance-limit contract.</p>
+    <div class="progress-container">
+      <div class="progress-label" style="color: var(--term-green);">1 → 110 VUs · 2m ramp + 2m hold</div>
+    </div>
+  </div>
+  <div class="scenario-card">
+    <h3>extratos</h3>
+    <div class="endpoint"><span class="method get">GET</span> /clientes/[id]/extrato</div>
+    <p>Ten VUs fetch account statements and verify that the reported total still respects the configured negative limit.</p>
+    <div class="progress-container">
+      <div class="progress-label">10 VUs · 1 iteration · starts at 10s</div>
     </div>
   </div>
 </section>
@@ -47,8 +71,8 @@
 <section class="stress-tests">
   <h3>⚡ Stress Test Results</h3>
   <p class="stress-intro">
-    Validated under extreme load conditions using k6 and xk6. The suite measures throughput, latency,
-    and correctness across all Rinha de Backend implementations.
+    Built from the checked-in k6 script and bundled with xk6-output-influxdb. The suite measures latency,
+    status handling, and balance consistency across the Rinha banking API endpoints.
   </p>
 
   <div class="stress-links">

@@ -5,22 +5,22 @@
   <div class="hero-content">
     <h1>IT WORKED ON YOUR MACHINE.<br>NOT ON OURS.</h1>
     <p class="tagline">
-      Performance testing harness for Rinha de Backend 2024/Q1. Simulate absolute chaos and stress test your fictional bank API implementations to the breaking point.
+      Grafana k6 harness for Rinha de Backend 2024/Q1. Run debit, credit, statement, validation, and missing-client checks with source-backed VU targets.
     </p>
     <div class="cta-group">
-      <a href="./docs/" class="btn-fire">INITIATE TEST SEQUENCE</a>
+      <a href="./docs/" class="btn-fire">READ QUICK START</a>
       <a href="https://github.com/jonathanperis/rinha2-back-end-k6" class="btn-secondary">Source Code</a>
     </div>
   </div>
 
   <div class="terminal-panel">
     <div class="terminal-content">
-      <div class="term-line">&gt; WARN: Starting load test sequence...</div>
-      <div class="term-line">&gt; Booting Virtual Users (VUs)...</div>
-      <div class="term-line">&gt; Setup: Ramp-up initialized (0 -&gt; 500 VUs)</div>
-      <div class="term-line">&gt; Executing scenario: default</div>
-      <div class="term-line">&gt; Metric: http_reqs measuring throughput...</div>
-      <div class="term-line">&gt; ERR: API latencies spiking above 250ms</div>
+      <div class="term-line">&gt; MODE=prod BASE_URL=http://api:9999</div>
+      <div class="term-line">&gt; scenario: debitos target=220VUs</div>
+      <div class="term-line">&gt; scenario: creditos target=110VUs</div>
+      <div class="term-line">&gt; scenario: extratos vus=10</div>
+      <div class="term-line">&gt; metrics: 5 custom Trend series</div>
+      <div class="term-line">&gt; output: quiet k6 CLI logs</div>
       <div class="term-line">&gt; <span class="cursor"></span></div>
     </div>
   </div>

@@ -31,11 +31,11 @@ docker run --rm -e MODE=dev -e BASE_URL=http://api:9999 -e K6_INFLUXDB_ADDR=http
 
 | Scenario | VUs | Duration | Purpose |
 |----------|-----|----------|---------|
-| Validacoes | 5 | 1 iteration each | Comprehensive workflow per client |
-| Cliente Nao Encontrado | 1 | 1 iteration | 404 error handling |
-| Debitos | 1→220 ramp | 4 minutes | Debit transactions + overdraft |
-| Creditos | 1→110 ramp | 4 minutes | Credit transactions |
-| Extratos | 10 | 1 iteration each | Statement retrieval |
+| `validacoes` | 5 | 1 iteration each | Comprehensive workflow per client |
+| `cliente_nao_encontrado` | 1 | 1 iteration | 404 error handling |
+| `debitos` | 1→220 ramp | 4 minutes | Debit transactions + overdraft |
+| `creditos` | 1→110 ramp | 4 minutes | Credit transactions |
+| `extratos` | 10 | 1 iteration each | Statement retrieval |
 
 ---
 
@@ -63,13 +63,14 @@ docker run --rm -e MODE=dev -e BASE_URL=http://api:9999 -e K6_INFLUXDB_ADDR=http
 ```
 rinha2-back-end-k6/
 ├── test/stress-test/
-│   ├── rinha-test.js    # Main test suite (318 lines, 5 scenarios)
+│   ├── rinha-test.js    # Main test suite (5 scenarios, 5 Trend metrics)
 │   └── run-test.sh      # Mode dispatcher (dev/prod) plus 15s startup delay
-├── Dockerfile            # Multi-stage: Go 1.25 + xk6 → Alpine 3.23
+├── Dockerfile            # Multi-stage: Go 1.25 Alpine 3.21 + xk6 → Alpine 3.23
 ├── .github/workflows/
 │   ├── main-release.yml  # Docker build + push to GHCR
 │   ├── deploy.yml        # Deploy docs to GitHub Pages
-│   └── codeql.yml        # Security scanning
+│   ├── codeql.yml        # Security scanning
+│   └── docs-drift.yml    # Source-backed docs drift check
 ├── docs/wiki/            # Source Markdown for public docs routes
 └── docs/                 # Astro documentation site
 ```
@@ -91,6 +92,7 @@ rinha2-back-end-k6/
 - **Main:** Multi-platform Docker build (`linux/amd64`, `linux/arm64/v8`) → push to GHCR
 - **Image:** `ghcr.io/jonathanperis/rinha2-back-end-k6:latest`
 - **Docs:** Astro site under `docs/` builds from `docs/wiki/` → GitHub Pages
+- **Docs Drift:** `scripts/check_docs_source_drift.py` verifies docs and homepage facts against source
 
 ---
 

@@ -1,0 +1,38 @@
+name: Docs Drift
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - AGENTS.md
+      - .agents/**
+      - Dockerfile
+      - test/stress-test/**
+      - docs/**
+      - scripts/check_docs_source_drift.py
+      - .github/workflows/docs-drift.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - README.md
+      - AGENTS.md
+      - .agents/**
+      - Dockerfile
+      - test/stress-test/**
+      - docs/**
+      - scripts/check_docs_source_drift.py
+      - .github/workflows/docs-drift.yml
+
+permissions:
+  contents: read
+
+jobs:
+  source-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Check docs against source facts
+        run: python3 scripts/check_docs_source_drift.py
