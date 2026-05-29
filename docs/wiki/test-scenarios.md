@@ -1,6 +1,6 @@
 # Test Scenarios
 
-The suite defines **5 source-backed k6 scenarios** in the 318-line `test/stress-test/rinha-test.js`. They all target `BASE_URL`, which defaults to `http://localhost:9999`.
+The suite defines **5 source-backed k6 scenarios** in `test/stress-test/rinha-test.js`. They all target `BASE_URL`, which defaults to `http://localhost:9999`.
 
 ## Scenario overview
 

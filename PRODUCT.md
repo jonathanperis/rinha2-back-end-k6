@@ -30,7 +30,7 @@ Visitors are usually technical, impatient, and skeptical. They want proof, comma
 - Five k6 scenarios aligned with the Rinha banking API: `validacoes`, `cliente_nao_encontrado`, `debitos`, `creditos`, and `extratos`.
 - Custom Trend metrics per scenario: `debitos_duration`, `creditos_duration`, `extratos_duration`, `validacoes_duration`, and `cliente_nao_encontrado_duration`.
 - Dual-mode execution:
-  - `prod`: HTML report output for CI and shareable runs.
+  - `prod`: quiet k6 CLI output for CI logs and repeatable runs.
   - `dev`: InfluxDB export for Grafana observability.
 - Docker-first usage with a custom k6 binary that includes `xk6-output-influxdb`.
 - Multi-platform GHCR image and GitHub Actions publishing.
@@ -45,8 +45,8 @@ Source-backed numbers should come from `test/stress-test/rinha-test.js` unless e
 - `creditos`: ramping VUs from 1 to 110, 2m ramp plus 2m hold, starts at 10s.
 - `extratos`: 10 VUs, 1 iteration each, starts at 10s.
 - Default `BASE_URL`: `http://localhost:9999`.
-- Production run example: `docker run --rm -e BASE_URL=http://api:9999 rinha-k6`.
-- Dev run example: `docker run --rm -e MODE=dev -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6`.
+- Production run example: `docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6`.
+- Dev run example: `docker run --rm -e MODE=dev -e BASE_URL=http://api:9999 -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6`.
 
 ## Brand Voice
 

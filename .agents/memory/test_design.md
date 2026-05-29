@@ -6,7 +6,7 @@ type: project
 
 ## Test Scenario Design
 
-The test suite (`test/stress-test/rinha-test.js`, 318 lines) implements 5 scenarios with staggered execution:
+The test suite (`test/stress-test/rinha-test.js`) implements 5 scenarios (`validacoes`, `cliente_nao_encontrado`, `debitos`, `creditos`, `extratos`) with staggered execution:
 
 **Immediate start (0s):**
 - **Validacoes** (5 VUs, 1 iter each): Full workflow per client — GET statement, POST credit, POST debit, GET verify, 5 invalid requests

@@ -139,7 +139,7 @@ Terminal panels should show real commands, real mode names, real scenario names,
 Good terminal content:
 
 ```sh
-MODE=prod BASE_URL=http://api:9999 ./run-test.sh
+MODE=prod BASE_URL=http://api:9999 /app/run-test.sh
 scenario: debitos target=220VUs
 trend: debitos_duration
 ```
@@ -160,7 +160,7 @@ Use the canonical five scenarios:
 
 Use a two-panel comparison:
 
-- `prod`: HTML report output for CI and shareable runs.
+- `prod`: quiet k6 CLI output for CI logs and repeatable runs.
 - `dev`: InfluxDB export for Grafana dashboards.
 
 ### Metrics Panel
@@ -223,7 +223,7 @@ Required:
 
 ## Known Current Issues to Address in Redesign
 
-- Some homepage numbers appear inconsistent with the current k6 script.
+- Keep homepage numbers source-backed whenever the k6 script changes.
 - `.stat-box` uses a thick left border accent, which should be replaced.
 - CRT flicker and scanlines are global and always-on.
 - The final stress-test panel has softer rounded styling than the sharper terminal system.

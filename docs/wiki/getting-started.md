@@ -4,20 +4,38 @@
 
 - Docker
 
-## Build
+## Use the published image
+
+For most backend implementations, pull the shared GHCR image and run it against your API gateway:
+
+```bash
+docker pull ghcr.io/jonathanperis/rinha2-back-end-k6:latest
+
+docker run --rm \
+  -e MODE=prod \
+  -e BASE_URL=http://api:9999 \
+  ghcr.io/jonathanperis/rinha2-back-end-k6:latest
+```
+
+## Build locally
+
+Build locally when changing this repository or testing an unpublished image:
 
 ```bash
 docker build -t rinha-k6 .
+docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
 ```
 
-## Run
+## Dev mode with InfluxDB
+
+Dev mode is the default when `MODE` is empty, and it requires an InfluxDB output target:
 
 ```bash
-# Dev run (InfluxDB metrics) — this is the default mode
-docker run --rm -e K6_INFLUXDB_ADDR=http://influxdb:8086 rinha-k6
-
-# Production/CI run (quiet k6 output)
-docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
+docker run --rm \
+  -e MODE=dev \
+  -e BASE_URL=http://api:9999 \
+  -e K6_INFLUXDB_ADDR=http://influxdb:8086 \
+  ghcr.io/jonathanperis/rinha2-back-end-k6:latest
 ```
 
 ## Environment Variables
@@ -33,12 +51,19 @@ docker run --rm -e MODE=prod -e BASE_URL=http://api:9999 rinha-k6
 - **dev** (default): Exports metrics to InfluxDB for real-time monitoring in Grafana dashboards
 - **prod**: Runs `k6 run rinha-test.js --quiet` for a quieter CI/log path. The entrypoint does not write an HTML artifact by itself.
 
-## Run with a Backend
+## Run with a backend
 
-Sibling backend implementations can include this image as their k6 service in `docker-compose.yml`. Start a backend stack that wires `BASE_URL` to its API/load-balancer endpoint:
+Sibling backend implementations can include this image as their k6 service in `docker-compose.yml`. Point `BASE_URL` at the service name and port used by the API gateway or load balancer:
 
-```bash
-# Example: run with the .NET implementation
-cd rinha2-back-end-dotnet
-docker compose up -d --build
+```yaml
+services:
+  k6:
+    image: ghcr.io/jonathanperis/rinha2-back-end-k6:latest
+    environment:
+      MODE: prod
+      BASE_URL: http://nginx:9999
+    depends_on:
+      - nginx
 ```
+
+Start the backend stack, then run the k6 service using that implementation's Compose workflow.
