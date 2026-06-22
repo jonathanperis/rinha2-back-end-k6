@@ -34,7 +34,7 @@ jobs:
       package-manager: bun
 ```
 
-That workflow builds the Astro site under `docs/` and publishes it to GitHub Pages after changes land on `main`.
+That workflow builds the Astro 7 static site under `docs/` with Bun and publishes it to GitHub Pages after changes land on `main`. Astro 7's Rust compiler, default Rust/Sätteri Markdown pipeline, Vite 8/Rolldown bundling, and queued rendering are adopted by the framework upgrade. Route caching, CDN cache providers, and `src/fetch.ts` advanced routing are not configured because this repository publishes static Pages output rather than an SSR/edge runtime.
 
 Public documentation route:
 
