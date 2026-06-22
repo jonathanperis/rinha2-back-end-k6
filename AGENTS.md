@@ -91,7 +91,7 @@ rinha2-back-end-k6/
 
 - **Main:** Multi-platform Docker build (`linux/amd64`, `linux/arm64/v8`) → push to GHCR
 - **Image:** `ghcr.io/jonathanperis/rinha2-back-end-k6:latest`
-- **Docs:** Astro site under `docs/` builds from `docs/wiki/` → GitHub Pages
+- **Docs:** Astro 7 static site under `docs/` builds from `docs/wiki/` → GitHub Pages
 - **Docs Drift:** `scripts/check_docs_source_drift.py` verifies docs and homepage facts against source
 
 ---

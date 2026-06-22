@@ -117,7 +117,7 @@ This README was checked against the current `Dockerfile`, `test/stress-test/rinh
 - `MODE=prod` runs `k6 run rinha-test.js --quiet`; it does not create an HTML file by itself.
 - empty `MODE` is treated as dev mode and runs `k6 run rinha-test.js -o xk6-influxdb`.
 - the release workflow currently publishes the `latest` GHCR tag only for `linux/amd64` and `linux/arm64/v8`.
-- the docs workflow delegates to the shared Pages workflow and builds from `docs/` with Bun.
+- the docs workflow delegates to the shared Pages workflow and builds the Astro 7 static site from `docs/` with Bun.
 - `scripts/check_docs_source_drift.py` guards public docs against stale scenario names, run modes, image tags, platforms, and homepage metrics.
 
 ## License
